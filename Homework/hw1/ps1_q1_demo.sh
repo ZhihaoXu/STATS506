@@ -31,16 +31,25 @@ do
 	fi
 done
 
+file="nhanes_demo.csv"
 # cut selected column
 if [ ! -f "nhanes_demo.csv" ]; then
 	head -n +1 DEMO_J.csv |
-	cut -d "," -f2,6,9,18-19,4,44-45,43,42>> nhanes_demo.csv
+	cut -d "," -f2,6,9,18-19,4,44-45,43,42>> $file
 	for i in 3 2 1 0
 	do
 		tail -n +2 "${csv_files[i]}" |
-		cut -d "," -f2,6,9,18-19,4,44-45,43,42>> nhanes_demo.csv
+		cut -d "," -f2,6,9,18-19,4,44-45,43,42>> $file
 	done
 fi
-echo "Part (b) Done"
+
+# Check duplicate lines
+uniq_lines=$(< $file sort | uniq | wc -l)
+n_lines=$(< $file wc -l)
+if [ $uniq_lines == $n_lines ]; then
+    echo "No duplicates in $file. Part (b) Finished."
+else
+    echo "Total lines in $file:" $n_lines, Unique lines: $uniq_lines.
+fi
 
 # 79: -------------------------------------------------------------------------

@@ -53,6 +53,8 @@ perf_roc = function(y, yhat, plot = c("none", "base", "ggplot2")){
   colnames(df) = c("Tau","TP","FP","TN","FN","Sensitivity","Specifity")
   df[,1] = tau
   df[,2:7] = t(sapply(tau, compute_tf1,y,yhat))
+  # add 0,1 to avoid just compute area from min to max,
+  # which can make this estimate more accurate
   fpr = c(1,1- df[,7],0)
   tpr = c(df[1,6],df[,6],0)
   area_roc = compute_area(fpr,tpr)
@@ -109,7 +111,9 @@ perf_pr = function(y, yhat, plot = c("none", "base", "ggplot2")){
   colnames(df) = c("Tau","TP","FP","TN","FN","Recall","Precision")
   df[,1] = tau
   df[,2:7] = t(sapply(tau, compute_tf2,y,yhat))
-  re = c(1,df[,6],0)
+  # add 0,1 to avoid just compute area from min to max,
+  # which can make this estimate more accurate
+  re = c(1,df[,6],0) 
   pre = c(0,df[,7],df[dim(df)[1],7])
   area_pr = compute_area(re,pre)
   # Plot of Precision-Recall Curve

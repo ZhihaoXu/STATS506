@@ -54,7 +54,8 @@ roc = perf_roc(data[,2],data[,1],"none")
 pr = perf_pr(data[,2],data[,1],"none")
 ```
 
-The AUC-ROC is `r roc$area_roc` and the AUC-PR is `r pr$area_pr`. Attached are both the base R and ggplot2 versions of plots showing the curves.
+The AUC-ROC is `r roc$area_roc` and the AUC-PR is `r pr$area_pr`. 
+Attached are both the base R and ggplot2 versions of plots showing the curves.
 
 ```{r q2_roc1, echo=FALSE, fig.height=4, fig.width=5.5,fig.cap=cap}
 roc1 = perf_roc(data[,2],data[,1],"base")
@@ -65,7 +66,6 @@ cap = paste0("ROC Curve by base R Graphics")
 roc2 = perf_roc(data[,2],data[,1],"ggplot2")
 cap = paste0("ROC Curve by ggplot2")
 ```
-
 
 ```{r q2_pr1, echo=FALSE, fig.height=4, fig.width=5.5,fig.cap=cap}
 pr1 = perf_pr(data[,2],data[,1],"base")
