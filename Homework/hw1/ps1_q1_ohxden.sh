@@ -2,11 +2,10 @@
 
 # Stats 506, Fall 2020 Homework 1 Question 1
 #
-# Author(s): Zhihao Xu
+# Author: Zhihao Xu
 # Updated: September 22, 2020
 # 79: -------------------------------------------------------------------------
 
-# download data for the problem set if needed: --------------------------------
 files=("OHXDEN_J.XPT" "OHXDEN_I.XPT" "OHXDEN_H.XPT" "OHXDEN_G.XPT") 
 urls=(
 "https://wwwn.cdc.gov/Nchs/Nhanes/2017-2018/OHXDEN_J.XPT"
@@ -15,14 +14,16 @@ urls=(
 "https://wwwn.cdc.gov/Nchs/Nhanes/2011-2012/OHXDEN_G.XPT"
 )
 csv_files=("OHXDEN_J.csv" "OHXDEN_I.csv" "OHXDEN_H.csv" "OHXDEN_G.csv")
+
+# download data for the problem set 
 for i in 0 1 2 3
 do
-	 ## download only if the file doesn't exist
 	if [ ! -f "${files[i]}" ]; then
 		wget ${urls[i]}
 	fi
 done
 
+# transfer the XPT file to csv by R
 for i in 0 1 2 3
 do
 	if [ ! -f "${csv_files[i]}" ]; then
@@ -30,6 +31,7 @@ do
 	fi
 done
 
+# cut selected column
 if [ ! -f "nhanes_ohxden.csv" ]; then
 	head -n +1 OHXDEN_J.csv |
 	cut -d "," -f2,4,6-65>> nhanes_ohxden.csv
