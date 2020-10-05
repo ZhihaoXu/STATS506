@@ -5,6 +5,10 @@ date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
 output: pdf_document
 ---
 
+In this assignment, `ps1_q1_ohxden.sh` is the bash file for Question 1 Part A, 
+`ps1_q1_demo.sh` is the bash file for Part B, `xpt2csv.R` is the Rcode used to 
+transfer the XPT file to csv file, and `ps1_q2.R` is the R code for Question 2.
+
 ```{r setup, include=FALSE}
 # 79: -------------------------------------------------------------------------
 #! We generally don't need to see the code in the results document.

@@ -43,7 +43,7 @@ if [ ! -f "nhanes_demo.csv" ]; then
 	done
 fi
 
-# Check duplicate lines
+# check duplicate lines
 uniq_lines=$(< $file sort | uniq | wc -l)
 n_lines=$(< $file wc -l)
 if [ $uniq_lines == $n_lines ]; then
