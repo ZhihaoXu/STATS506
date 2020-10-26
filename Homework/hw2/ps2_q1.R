@@ -1,10 +1,13 @@
 ## Stats 506, Fall 2020 Problem Set 2 Question 1
 ##
 ## Author: Zhihao Xu, xuzhihao@umich.edu
-## Updated: October 8, 2020 
+## Updated: October 9, 2020 
+## The code in data cleaning process refers to the code used in
+## tidyverse case study.
 # 79: -------------------------------------------------------------------------
 # libraries: ------------------------------------------------------------------
 library(tidyverse)
+library(kableExtra)
 
 # directories: ----------------------------------------------------------------
 path = './data'
@@ -110,26 +113,16 @@ recs_15 = recs_15 %>%
 
 # Problem (a)
 ## recs2009
-## mean of the number of televisions by census division
-mean_by_div_09 = recs_09 %>%
-  group_by(division) %>%
+## mean of the number of televisions by census division and ur status
+mean_09 = recs_09 %>%
+  group_by(division, ur) %>%
   summarise(mean_tv = sum(tv_num * w)/sum(w), .groups = 'drop_last')
-## proportion of the type of the most used television by census division
-prop_by_div_09 = recs_09 %>% 
-  group_by(division,tv_type) %>%
-  summarise( n = n() , 
-             new_w = sum(w),
-             .groups = 'drop_last') %>%
-  mutate( prop_type = new_w / sum(new_w) ) %>%
-  select(-n,-new_w)
 
-## mean of the number of televisions by urban/rural status
-mean_by_ur_09 = recs_09 %>%
-  group_by(ur) %>%
-  summarise(mean_tv = sum(tv_num * w)/sum(w), .groups = 'drop_last')
-## proportion of the type of the most used television by urban/rural status
-prop_by_ur_09 = recs_09 %>% 
-  group_by(ur,tv_type) %>%
+
+## proportion of the type of the most used television 
+## by census division and ur status
+prop_09 = recs_09 %>% 
+  group_by(division, ur, tv_type) %>%
   summarise( n = n() , 
              new_w = sum(w),
              .groups = 'drop_last') %>%
@@ -138,31 +131,21 @@ prop_by_ur_09 = recs_09 %>%
 
 # Problem (b)
 ## recs2015
-## mean of the number of televisions by census division
-mean_by_div_15 = recs_15 %>%
-  group_by(division) %>%
+## mean of the number of televisions by census division and ur status
+mean_15 = recs_15 %>%
+  group_by(division, ur) %>%
   summarise(mean_tv = sum(tv_num * w)/sum(w), .groups = 'drop_last')
-## proportion of the type of the most used television by census division
-prop_by_div_15 = recs_15 %>% 
-  group_by(division,tv_type) %>%
+
+## proportion of the type of the most used television 
+## by census division and ur status
+prop_15 = recs_15 %>% 
+  group_by(division, ur, tv_type) %>%
   summarise( n = n() , 
              new_w = sum(w),
              .groups = 'drop_last') %>%
   mutate( prop_type = new_w / sum(new_w) ) %>%
   select(-n,-new_w)
 
-## mean of the number of televisions by urban/rural status
-mean_by_ur_15 = recs_15 %>%
-  group_by(ur) %>%
-  summarise(mean_tv = sum(tv_num * w)/sum(w), .groups = 'drop_last')
-## proportion of the type of the most used television by urban/rural status
-prop_by_ur_15 = recs_15 %>% 
-  group_by(ur,tv_type) %>%
-  summarise( n = n() , 
-             new_w = sum(w),
-             .groups = 'drop_last') %>%
-  mutate( prop_type = new_w / sum(new_w) ) %>%
-  select(-n,-new_w)
 
 
 
@@ -187,20 +170,19 @@ long_weights_15 = rep_weights15 %>%
   mutate( rep = as.integer(rep) )
 
 
-plot_tv_type = function(long_weights,recs, prop_est, by_obj){
+plot_tv_type = function(long_weights,recs, prop_est){
   # generate the CI table for proportion of the most used television   
   # and plot it using ggplot2
   # Inputs: 
   #   long_weights - replicate weight of target year (2009 / 2015)
   #   recs - recs data of target year (2009 / 2015)
   #   prop_est - the estimation table of proportion
-  #   by_obj - specify the plot is group by 'division' or 'ur status'
   # Output: add lwr, upr and se for CI in proportion table 
   year = deparse(substitute(long_weights))
   year = paste0("20",substr(year,nchar(year)-1,nchar(year)))
   prop_repl = recs %>%
     left_join(long_weights, by = 'id') %>%
-    group_by((!!as.name(by_obj)), rep, tv_type) %>%
+    group_by(division, ur, rep, tv_type) %>%
     summarise( n = n() , 
                new_w = sum(rw),
                .groups = 'drop_last')  %>%
@@ -210,13 +192,13 @@ plot_tv_type = function(long_weights,recs, prop_est, by_obj){
   
   fay = 0.5
   prop_var = prop_repl %>%
-    left_join(prop_est, by = c(by_obj, 'tv_type')) %>%
-    group_by((!!as.name(by_obj)), tv_type) %>%
+    left_join(prop_est, by = c('division', 'ur', 'tv_type')) %>%
+    group_by(division, ur, tv_type) %>%
     summarize(v = mean( {prop_repl - prop_type}^2 ) / { {1 - fay}^2 }, 
               .groups = 'drop')
   
   prop_est = prop_est %>%
-    left_join(prop_var, by = c(by_obj, 'tv_type'))
+    left_join(prop_var, by = c('division', 'ur', 'tv_type'))
   
   ## construct CI's
   m = qnorm(.975)
@@ -224,36 +206,36 @@ plot_tv_type = function(long_weights,recs, prop_est, by_obj){
     mutate(
       se = sqrt(v),
       lwr = pmax(prop_type - m * se, 0),
-      upr = pmin(prop_type + m * se, 1)
+      upr = pmin(prop_type + m * se, 1),
     ) %>%
     select(-v, se)
   
   p = prop_est  %>%
-    group_by((!!as.name(by_obj)),tv_type) %>% 
-    ggplot(aes(x = prop_type, y = (!!as.name(by_obj)))) +
+    group_by(division, ur,tv_type) %>% 
+    ggplot(aes(x = prop_type, y = division, shape = ur)) +
     geom_point(aes(color = tv_type), position = position_dodge(0.3)) +
     geom_errorbarh( aes(xmin = lwr, xmax = upr, color=tv_type), 
                     position = position_dodge(0.3)) + 
+    facet_grid(tv_type~ur) + 
     xlab('Proportion of Type for Most Used Television') +
     theme_bw()
-  pic_name = paste('./pic/ps2_q1_prop_', by_obj, "_", year, ".png", sep="")
+  pic_name = paste('./pic/ps2_q1_prop_', year, ".png", sep="")
   ggsave(pic_name, width = 8,height = 4)
   print(p)
   return(prop_est)
 }
 
-plot_diff_tv_type = function(data_09, data_15, by_obj){
+plot_diff_tv_type = function(data_09, data_15){
   # generate the CI table for the difference of proportion of the most used 
   # television from 2009 to 2015 and plot it using ggplot2
   # Inputs: 
   #   data_09 - the estimate table of 2009
   #   data_15 - the estimate table of 2015
-  #   by_obj - specify the plot is group by 'division' or 'ur status'
   # Output: a new table with the estimated change of proportion from 
   #   2009 to 2015 and together with lwr, upr for CI.
   m = qnorm(.975)
-  diff_by_div = data_09 %>%
-    left_join(data_15, by=c(by_obj,"tv_type")) %>%
+  diff_tv_type = data_09 %>%
+    left_join(data_15, by=c('division', 'ur', "tv_type")) %>%
     transmute(
       tv_type = tv_type,
       dif = prop_type.y - prop_type.x,
@@ -261,51 +243,51 @@ plot_diff_tv_type = function(data_09, data_15, by_obj){
       lwr = dif - m * se,
       upr = dif + m * se
     ) %>%
+    drop_na() %>%
     select(-se)
   
-  p = diff_by_div  %>%
-    group_by((!!as.name(by_obj)),tv_type) %>% 
-    ggplot(aes(x = dif, y = (!!as.name(by_obj)))) +
+  p = diff_tv_type  %>%
+    group_by(division, ur, tv_type) %>% 
+    ggplot(aes(x = dif, y = division, shape = ur)) +
     geom_point(aes(color = tv_type), position = position_dodge(0.3)) +
     geom_vline(xintercept = 0, col = "black", linetype="dashed") + 
     geom_errorbarh( aes(xmin = lwr, xmax = upr, color=tv_type), 
                     position = position_dodge(0.3)) + 
+    facet_grid(tv_type~ur) + 
     xlab('Proportion of Type for Most Used Television') +
     theme_bw()
-  pic_name = paste('./pic/ps2_q1_prop_diff_', by_obj,".png", sep="")
+  pic_name = paste('./pic/ps2_q1_prop_diff',".png", sep="")
   ggsave(pic_name, width = 8,height = 4)
   print(p)
-  return(diff_by_div)
+  return(diff_tv_type)
 }
 
 
-
-plot_tv_num = function(long_weights,recs, mean_est, by_obj){
+plot_tv_num = function(long_weights,recs, mean_est){
   # generate the CI table for the mean number of televisions   
   # and plot it using ggplot2
   # Inputs: 
   #   long_weights - replicate weight of target year (2009 / 2015)
   #   recs - recs data of target year (2009 / 2015)
   #   mean_est - the estimation table of mean value of TV number
-  #   by_obj - specify the plot is group by 'division' or 'ur status'
   # Output: add lwr, upr and se for CI in mean estimate table 
   year = deparse(substitute(long_weights))
   year = paste0("20",substr(year,nchar(year)-1,nchar(year)))
   mean_repl = recs %>%
     left_join(long_weights, by = 'id') %>%
-    group_by((!!as.name(by_obj)), rep) %>%
+    group_by(division, ur, rep) %>%
     transmute( mean_repl = sum(rw * tv_num)/ sum(rw) ) %>%
     ungroup()
   
   fay = 0.5
   mean_var = mean_repl %>%
-    left_join(mean_est, by = by_obj) %>%
-    group_by((!!as.name(by_obj))) %>%
+    left_join(mean_est, by = c('division','ur')) %>%
+    group_by(division, ur) %>%
     summarize(v = mean( {mean_repl - mean_tv}^2 ) / { {1 - fay}^2 }, 
               .groups = 'drop')
   
   mean_est = mean_est %>%
-    left_join(mean_var, by = by_obj)
+    left_join(mean_var, by = c('division','ur'))
   
   ## construct CI's
   m = qnorm(.975)
@@ -318,32 +300,32 @@ plot_tv_num = function(long_weights,recs, mean_est, by_obj){
     select(-v, se)
   
   p = mean_est  %>%
-    group_by((!!as.name(by_obj))) %>% 
-    ggplot(aes(x = mean_tv, y = (!!as.name(by_obj)))) +
+    group_by(division, ur) %>% 
+    ggplot(aes(x = mean_tv, y = division, color = ur, shape = ur)) +
     geom_point(position = position_dodge(0.3)) +
     geom_errorbarh( aes(xmin = lwr, xmax = upr), 
                     position = position_dodge(0.3)) + 
-    xlab('Proportion of Type for Most Used Television') +
+    xlab('Mean of the Number of Televisions') +
     theme_bw()
-  pic_name = paste('./pic/ps2_q1_mean_', by_obj, "_", year, ".png", sep="")
+  pic_name = paste('./pic/ps2_q1_mean_', year, ".png", sep="")
   ggsave(pic_name, width = 8,height = 4)
   print(p)
   return(mean_est)
 }
 
-plot_diff_tv_num = function(data_09, data_15, by_obj){
+
+plot_diff_tv_num = function(data_09, data_15){
   # generate the CI table for the change of mean number of television
   # from 2009 to 2015 and plot it using ggplot2
   # Inputs: 
   #   data_09 - the estimate table of 2009
   #   data_15 - the estimate table of 2015
-  #   by_obj - specify the plot is group by 'division' or 'ur status'
   # Output: a new table with the estimated change of mean number of televisions
   # from 2009 to 2015 and together with lwr, upr for CI.
   m = qnorm(.975)
-  diff_by_div = data_09 %>%
-    left_join(data_15, by=by_obj) %>%
-    group_by((!!as.name(by_obj))) %>%
+  diff_num = data_09 %>%
+    left_join(data_15, by=c('division', 'ur')) %>%
+    group_by(division, ur) %>%
     transmute(
       dif = mean_tv.y - mean_tv.x,
       se = sqrt(se.x^2 + se.y^2),
@@ -352,49 +334,32 @@ plot_diff_tv_num = function(data_09, data_15, by_obj){
     ) %>%
     select(-se)
   
-  p = diff_by_div  %>%
-    group_by((!!as.name(by_obj))) %>% 
-    ggplot(aes(x = dif, y = (!!as.name(by_obj)))) +
+  p = diff_num  %>%
+    group_by(division, ur) %>% 
+    ggplot(aes(x = dif, y = division, shape = ur, color = ur)) +
     geom_point( position = position_dodge(0.3)) +
     geom_vline(xintercept = 0, col = "blue", linetype="dashed")  + 
     geom_errorbarh( aes(xmin = lwr, xmax = upr), 
                     position = position_dodge(0.3)) + 
-    xlab('Proportion of Type for Most Used Television') +
+    xlab('Mean of the Number of Televisions') +
     theme_bw()
-  pic_name = paste('./pic/ps2_q1_mean_diff_', by_obj,".png", sep="")
+  pic_name = paste('./pic/ps2_q1_mean_diff',".png", sep="")
   ggsave(pic_name, width = 8,height = 4)
   
   print(p)
-  return(diff_by_div)
+  return(diff_num)
 }
 
 # don't run it when being sourced, if needs to run it interactively, 
 # change it to TRUE
 if (FALSE) {
-  num_by_div_ci_09 = plot_tv_num(long_weights_09, recs_09, mean_by_div_09,
-                                 by_obj = "division")
-  num_by_ur_ci_09 = plot_tv_num(long_weights_09, recs_09, mean_by_ur_09,
-                                by_obj = "ur")
-  num_by_div_ci_15 = plot_tv_num(long_weights_15, recs_15, mean_by_div_15,
-                                 by_obj = "division")
-  num_by_ur_ci_15 = plot_tv_num(long_weights_15, recs_15, mean_by_ur_15,
-                                by_obj = "ur")
+  prop_ci_09 = plot_tv_type(long_weights_09, recs_09, prop_09)
+  prop_ci_15 = plot_tv_type(long_weights_15, recs_15, prop_15)
+  plot_diff_tv_type(prop_ci_09, prop_ci_15)
   
-  plot_diff_tv_num(num_by_div_ci_09, num_by_div_ci_15, by_obj = "division")
-  plot_diff_tv_num(num_by_ur_ci_09, num_by_ur_ci_15, by_obj = "ur")
-  
-  
-  prop_by_div_ci_09 = plot_tv_type(long_weights_09, recs_09, prop_by_div_09,
-                                   by_obj = "division")
-  prop_by_ur_ci_09 = plot_tv_type(long_weights_09, recs_09, prop_by_ur_09,
-                                  by_obj = "ur")
-  prop_by_div_ci_15 = plot_tv_type(long_weights_15, recs_15, prop_by_div_15,
-                                   by_obj = "division")
-  prop_by_ur_ci_15 = plot_tv_type(long_weights_15, recs_15, prop_by_ur_15,
-                                  by_obj = "ur")
-  
-  plot_diff_tv_type(prop_by_div_ci_09, prop_by_div_ci_15, by_obj = "division")
-  plot_diff_tv_type(prop_by_ur_ci_09, prop_by_ur_ci_15, by_obj = "ur")
+  num_ci_09 = plot_tv_num(long_weights_09, recs_09, mean_09)
+  num_ci_15 = plot_tv_num(long_weights_15, recs_15, mean_15)
+  plot_diff_tv_num(num_ci_09, num_ci_15)
 }
 
 

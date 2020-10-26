@@ -5,7 +5,7 @@
 # Shell Script for Problem Set 2
 #
 # Author(s): James Henderson
-# Updated: September 13, 2020
+# Updated: October 8, 2020
 # 79: -------------------------------------------------------------------------
 
 # download data for the problem set if needed: --------------------------------

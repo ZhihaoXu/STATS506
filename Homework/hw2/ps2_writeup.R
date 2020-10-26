@@ -9,7 +9,8 @@
 
 #' ## About
 #' This is a report using data from the 2009 and 2015 Residential Energy 
-#' Consumption Survey ([RECS]())) run by the Energy Information Agency. 
+#' Consumption Survey ([RECS](https://www.eia.gov/consumption/residential)) 
+#' run by the Energy Information Agency. 
 #' 
 #' We use this data to estimate the mean or proportion for number of televisions
 #' and the type for most used television, and we estimate the change from 2009 
@@ -23,7 +24,7 @@ knitr::opts_chunk$set(echo = FALSE)
 source('./ps2_q1.R')
 
 #' 
-#' ## Problem (a)
+#' ## Problem (a) 
 #' Here are the plot and table of the estimated mean or proportion and 
 #' together with tue corresponding confidence intervals of number of 
 #' televisions and the type for the most used televisions by  Census Division 
@@ -32,148 +33,172 @@ source('./ps2_q1.R')
 
 
 #' ### {.tabset .tabset-pills .tabset-fade}
-#' #### RECS 2009 by Division
-#+ figure1, fig.cap=cap1, fig.height=4, fig.width=8, fig.align="center"
+#' #### Proportion of TV (Figure)
+#+ figure1, fig.cap=cap1, fig.height=10, fig.width=8, fig.align="center"
 cap1 = paste(
-  "**Figure 1.** *Mean number of Televisions by Census Division in 2009.*"
+  "**Figure 1.** *Mean number of Televisions by Census Division and",
+  "Urban/Rural Status in RECS 2009.*"
 )
-num_by_div_ci_09 = plot_tv_num(long_weights_09, recs_09, mean_by_div_09,
-                               by_obj = "division")
-num_by_div_ci_09
+prop_ci_09 = plot_tv_type(long_weights_09, recs_09, prop_09)
 
-#' #### RECS 2009 by Urban/Rural
+#' #### Proportion of TV (Table)
+#+ r tab1
+prop_ci_09 %>%
+  group_by(division, ur, tv_type) %>%
+  transmute(
+    avg = paste0(sprintf("%5.3f", prop_type)," (",
+                 sprintf("%5.3f", lwr),", ",
+                 sprintf("%5.3f", upr),")"),
+  )%>%
+  knitr::kable(format = "html", 
+               col.names = c('Division', 'Urban/Rural Status', 
+                             'TV Type', 'Proportion (C.I.)')) %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
+
+#' #### Number of TV (Figure)
 #+ figure2, fig.cap=cap2, fig.height=4, fig.width=8, fig.align="center"
 cap2 = paste(
-  "**Figure 2.** *Mean number of Televisions by Urban/Rural Status in 2009.*"
+  "**Figure 2.** *Proportion of the Most Used Television",
+  "by Census Division and Urban/Rural Status in RECS 2009.*"
 )
-num_by_ur_ci_09 = plot_tv_num(long_weights_09, recs_09, mean_by_ur_09,
-                              by_obj = "ur")
-num_by_ur_ci_09
+num_ci_09 = plot_tv_num(long_weights_09, recs_09, mean_09)
 
-#' #### RECS 2015 by Division
-#+ figure3, fig.cap=cap3, fig.height=4, fig.width=8, fig.align="center"
-cap3 = paste(
-  "**Figure 3.** *Mean number of Televisions by Census Division in 2015.*"
-)
-num_by_div_ci_15 = plot_tv_num(long_weights_15, recs_15, mean_by_div_15,
-                               by_obj = "division")
-num_by_div_ci_15
-
-#' #### RECS 2015 by Urban/Rural
-#+ figure4, fig.cap=cap4, fig.height=4, fig.width=8, fig.align="center"
-cap4 = paste(
-  "**Figure 4.** *Mean number of Televisions by Urban/Rural Status in 2015.*"
-)
-num_by_ur_ci_15 = plot_tv_num(long_weights_15, recs_15, mean_by_ur_15,
-                              by_obj = "ur")
-num_by_ur_ci_15
+#' #### Number of TV (Table)
+#+ r tab 2
+num_ci_09 %>%
+  group_by(division, ur) %>%
+  transmute(
+    avg = paste0(sprintf("%4.2f", mean_tv)," (",
+                 sprintf("%4.2f", lwr),", ",
+                 sprintf("%4.2f", upr),")"),
+  )%>%
+  knitr::kable(format = "html", 
+               col.names = c('Division', 'Urban/Rural Status', 
+                             'Mean Number (C.I.)')) %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
 
 
-#' 
+
+
 #' ## Problem (b)
-#' Here are the plot and table of the estimated mean or proportion and 
-#' together with tue corresponding confidence intervals of number of 
-#' televisions and the type for the most used televisions by  Census Division 
+#' Here are the plot and table of the estimated mean or proportion and
+#' together with tue corresponding confidence intervals of number of
+#' televisions and the type for the most used televisions by  Census Division
 #' and Urban/Rural Status of 2015 RECS data.
 #' 
 #' ### {.tabset .tabset-pills .tabset-fade}
-#' #### RECS 2009 by Division
-#+ figure5, fig.cap=cap5, fig.height=4, fig.width=8, fig.align="center"
-cap5 = paste(
-  "**Figure 5.** *Proportion of the most used television",
-  "by Census Division in 2009.*"
+#' #### Proportion of TV (Figure)
+#+ figure3, fig.cap=cap3, fig.height=10, fig.width=8, fig.align="center"
+cap3 = paste(
+  "**Figure 3.** *Mean number of Televisions by Census Division and",
+  "Urban/Rural Status in RECS 2015.*"
 )
-prop_by_div_ci_09 = plot_tv_type(long_weights_09, recs_09, prop_by_div_09,
-                                 by_obj = "division")
-prop_by_div_ci_09
+prop_ci_15 = plot_tv_type(long_weights_15, recs_15, prop_15)
 
-#' #### RECS 2009 by Urban/Rural
-#+ figure6, fig.cap=cap6, fig.height=4, fig.width=8, fig.align="center"
-cap6 = paste(
-  "**Figure 6.** *Proportion of the most used television",
-  "by Urban/Rural Status in 2009.*"
+#' #### Proportion of TV (Table)
+#+ r tab3
+prop_ci_15 %>%
+  group_by(division, ur, tv_type) %>%
+  transmute(
+    avg = paste0(sprintf("%5.3f", prop_type)," (",
+                 sprintf("%5.3f", lwr),", ",
+                 sprintf("%5.3f", upr),")"),
+  )%>%
+  knitr::kable(format = "html", 
+               col.names = c('Division', 'Urban/Rural Status', 
+                             'TV Type', 'Proportion (C.I.)')) %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
+
+#' #### Number of TV (Figure)
+#+ figure4, fig.cap=cap4, fig.height=4, fig.width=8, fig.align="center"
+cap4 = paste(
+  "**Figure 4.** *Proportion of the Most Used Television",
+  "by Census Division and Urban/Rural Status in RECS 2015.*"
 )
-prop_by_ur_ci_09 = plot_tv_type(long_weights_09, recs_09, prop_by_ur_09,
-                                by_obj = "ur")
-prop_by_ur_ci_09
+num_ci_15 = plot_tv_num(long_weights_15, recs_15, mean_15)
 
-#' #### RECS 2015 by Division
-#+ figure7, fig.cap=cap7, fig.height=4, fig.width=8, fig.align="center"
-cap7 = paste(
-  "**Figure 7.** *Proportion of the most used television",
-  "by Census Division in 2015.*"
-)
-prop_by_div_ci_15 = plot_tv_type(long_weights_15, recs_15, prop_by_div_15,
-                                 by_obj = "division")
-prop_by_div_ci_15
+#' #### Number of TV (Table)
+#+ tab 4
+num_ci_15 %>%
+  group_by(division, ur) %>%
+  transmute(
+    avg = paste0(sprintf("%4.2f", mean_tv)," (",
+                 sprintf("%4.2f", lwr),", ",
+                 sprintf("%4.2f", upr),")"),
+  )%>%
+  knitr::kable(format = "html", 
+               col.names = c('Division', 'Urban/Rural Status', 
+                             'Mean Number (C.I.)')) %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
 
-#' #### RECS 2015 by Urban/Rural
-#+ figure8, fig.cap=cap8, fig.height=4, fig.width=8, fig.align="center"
-cap8 = paste(
-  "**Figure 8.** *Proportion of the most used television",
-  "by Urban/Rural Status in 2009.*"
-)
-prop_by_ur_ci_15 = plot_tv_type(long_weights_15, recs_15, prop_by_ur_15,
-                                by_obj = "ur")
-prop_by_ur_ci_15
-
-
-#' 
+#'
 #' ## Problem (c)
-#' 
+#'
 #' Here we estimate the change from 2009 to 2015 and together with corresponding
-#' confidence intervals. The result is also presented by both the table and 
+#' confidence intervals. The result is also presented by both the table and
 #' figures generated by ggplot2.
-#' 
-#' Through the following plot, we can see that from 2009 to 2015, the number of 
-#' televisions used in almost all the division and urban/rural area are 
+#'
+#' Through the following plot, we can see that from 2009 to 2015, the number of
+#' televisions used in almost all the division and urban/rural area are
 #' decreasing. As for the most popular type of television, the Plasma TV
-#' significantly decreased and the LCD and Projection TV also slightly 
+#' significantly decreased and the LCD and Projection TV also slightly
 #' decreased. But the proportion of Standard tube TV and LED TV increase a lot.
 #' In 2009, Plasma TV and LCD are quite close in competing the most popular TV,
-#' but In 2015, the LED TV is already quite close to the most popular one, and 
+#' but In 2015, the LED TV is already quite close to the most popular one, and
 #' till 2015, LCD is still the most popular TV but the increasing rate is slower
 #' than the LED TV. It is very likely to be overtaken by LED TV in the future.
 #' Al the above findings seem to be consistent across different census divisions
 #' and urban/rural status.
-#' 
+#'
 #' ### {.tabset .tabset-pills .tabset-fade}
-#' #### Mean Number by Division
-#+ figure9, fig.cap=cap9, fig.height=4, fig.width=8, fig.align="center"
-cap9 = paste(
-  "**Figure 9.** Change in the proportion of the most used television",
-  "by Census Division from 2009 to 2015.*"
+#' #### Proportion of TV (Figure)
+#+ figure5, fig.cap=cap5, fig.height=10, fig.width=8, fig.align="center"
+cap5 = paste(
+  "**Figure 5.** Change in the Proportion of the Most Used Television",
+  "by Census Division and Urban/Rura Status from 2009 to 2015.*"
 )
-diff_tv_num_by_div = plot_diff_tv_num(num_by_div_ci_09, num_by_div_ci_15, 
-                                      by_obj = "division")
-diff_tv_num_by_div
+diff_tv_type = plot_diff_tv_type(prop_ci_09, prop_ci_15)
 
-#' #### Mean Number by Urban/Rural
-#+ figure10, fig.cap=cap10, fig.height=4, fig.width=8, fig.align="center"
-cap10 = paste(
-  "**Figure 10.** Change in the proportion of the most used television",
-  "by Urban/Rural Status from 2009 to 2015.*"
-)
-diff_tv_num_by_ur = plot_diff_tv_num(num_by_ur_ci_09, num_by_ur_ci_15, 
-                                     by_obj = "ur")
-diff_tv_num_by_ur
+#' #### Proportion of TV (Table)
+#+ r tab5
+diff_tv_type %>%
+  group_by(division, ur, tv_type) %>%
+  transmute(
+    change = sprintf("%5.3f", dif),
+    avg = paste0(" (", sprintf("%5.3f", lwr),", ",
+                 sprintf("%5.3f", upr),")"),
+  )%>%
+  knitr::kable(format = "html", align='lllrc',
+               col.names = c('Division', 'Urban/Rural Status', 
+                             'TV Type', 'Proportion', 'C.I.')) %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
 
-#' #### Proportion by Division
-#+ figure11, fig.cap=cap11, fig.height=4, fig.width=8, fig.align="center"
-cap11 = paste(
-  "**Figure 11.** Change in the mean number of televisions",
-  "by Census Division from 2009 to 2015.*"
+#' #### Number of TV (Figure)
+#+ figure6, fig.cap=cap6, fig.height=4, fig.width=8, fig.align="center"
+cap6 = paste(
+  "**Figure 6.** Change in the Mean Numbero of Televisions",
+  "by Census Division and Urban/Rura Status from 2009 to 2015.*"
 )
-diff_tv_type_by_div = plot_diff_tv_type(prop_by_div_ci_09, prop_by_div_ci_15, 
-                                        by_obj = "division")
-diff_tv_type_by_div
+diff_tv_num = plot_diff_tv_num(num_ci_09, num_ci_15)
 
-#' #### Proportion by Urban/Rural
-#+ figure12, fig.cap=cap12, fig.height=4, fig.width=8, fig.align="center"
-cap12 = paste(
-  "**Figure 12.** Change in the mean number of televisions",
-  "by Urban/Rural Status from 2009 to 2015.*"
-)
-diff_tv_type_by_ur = plot_diff_tv_type(prop_by_ur_ci_09, prop_by_ur_ci_15, 
-                                       by_obj = "ur")
-diff_tv_type_by_ur
+#' #### Number of TV (Table)
+#+ r tab 6
+diff_tv_num %>%
+  group_by(division, ur) %>%
+  transmute(
+    change = sprintf("%4.2f", dif),
+    ci = paste0(" (", sprintf("%4.2f", lwr),", ",
+                 sprintf("%4.2f", upr),")"),
+  )%>%
+  knitr::kable(format = "html", align='llrc',
+               col.names = c('Division', 'Urban/Rural Status', 
+                             'Change', 'C.I.')) %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
+
+
+
+
+
+
+
+
