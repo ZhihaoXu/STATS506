@@ -1,3 +1,6 @@
 [submodule "Stats506_F20"]
 	path = Stats506_F20
 	url = https://github.com/jbhender/Stats506_F20.git
+[submodule "Stats506_public"]
+	path = Stats506_public
+	url = https://github.com/ZhihaoXu/Stats506_public.git
