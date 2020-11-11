@@ -1,0 +1,17 @@
+---
+title: "test"
+author: "Xu Zhihao"
+date: "11/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(reticulate)
+```
+
+```{python, engine.path="/opt/anaconda3/bin/python"}
+import math
+print(math.pi)
+```
+
