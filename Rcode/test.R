@@ -1,27 +1,21 @@
 library(tidyverse)
-data = read.delim("CommViolPredUnnormalizedData.txt", sep = ",", header=F) %>%
-  select(
-    comminty = V1, population = V6, householdsize = V7, racepctblack = V8,
-    racePctWhite = V9, racePctAsian = V10, 
-    racePctHisp = V11, murderRate = V131) %>%
-  mutate(
-    size = ifelse(householdsize<=median(householdsize),"S", "L")
-  ) 
-
+data = read.delim("../data/nhanes.csv", sep = ",", header=T)
+  
 data %>% 
   group_by(size) %>%
   transmute(
     meanMur = mean(murderRate)
   )
 
-ps.formula <- as.formula(I(size=="L") ~ population + racepctblack+ 
-                           racePctWhite + racePctAsian + racePctHisp)
-ps.fit <- glm(ps.formula,family="binomial", data=data)
+ps.formula <- as.formula(diabete~ relative_heart_attack+gender+age+race+edu+annual_income+bmi+
+                          smoke_life+phy_vigorous+phy_moderate+blood_press+blood_press2+hyper_med+hbq_med+
+                          high_chol+meadial_access+cover_hc +health_diet+year_smoke+year_hyper)
+ps.fit <- svyglm(ps.formula,family="binomial", data=data,iter=1000,  weights=data$weight)
 data$ps <- predict(ps.fit, type="response")
 require(MatchIt)
 set.seed(123)
 match.obj <- matchit(ps.formula, data = data,
-                     distance = 'logit', 
+                     distance = 'mahalanobis', 
                      method = "nearest", 
                      replace=FALSE,
                      caliper = .2, 

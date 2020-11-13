@@ -1,0 +1,202 @@
+---
+title: "writeup_R"
+author: "Yawen Hu, yawenhu@umich.edu"
+date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
+output: html_document
+     
+---
+
+```{r libraries, message = FALSE}
+# libraries: ------------------------------------------------------------------
+library(MatchIt)
+library(survey)
+library(tidyverse)
+library(ggplot2)
+library(tableone)
+
+# data: -----------------------------------------------------------------------
+nhanes = read_delim("nhanes.csv", delim = ",")
+nhanes = nhanes %>%
+  mutate(
+    diabete = as.factor(diabete),
+    heart_attack = as.factor(heart_attack),
+    gender = ifelse(gender == 2, 1, 0),
+  )
+```
+
+
+### I. Propensity score estimation
+```{r p_score, warning = FALSE, message = FALSE}
+## Logistic regression for treatment ~ pretreatment:
+design_ps = svydesign( ids = ~1, weights = ~weight, data = nhanes )
+ps_mod = svyglm(diabete ~ relative_heart_attack + gender + age + race + edu 
+                + annual_income + bmi + smoke_life + phy_vigorous + phy_moderate 
+                + blood_press + blood_press2 + hyper_med + hbq_med + high_chol 
+                + meadial_access + cover_hc + health_diet + year_smoke + year_hyper,
+                family = binomial(),
+                design = design_ps)
+#summary(ps_mod)
+
+## Get the propensity score:
+p_score = predict(ps_mod, type = "response")
+```
+
+<details>
+<summary> Click to view `code for figure1`. </summary>
+```{r propensity score distribution}
+cap1 = "**figure 1.** *Propensity score distribution by Treated/Control Groups*"
+ps = data.frame(
+  p_score = ps_mod$fitted.values,
+  Diabete = ifelse(ps_mod$model$diabete == 1, "Diabetes", "No Diabetes")
+)
+
+fig1 = ps %>%
+  ggplot( aes(x = p_score) ) + 
+  geom_histogram( aes(color = Diabete, fill = Diabete),
+                      position = "identity", bins = 30, alpha = 0.3) +
+  scale_color_manual(values = c("#00AFBB", "#E7B800")) +
+  scale_fill_manual(values = c("#00AFBB", "#E7B800")) +
+  xlab("Propensity Score") + 
+  ylab("Frequency") +
+  theme_bw()
+```
+</details>
+
+```{r fig1, fig.cap=cap1}
+cap1 = "**figure 1.** *Propensity score distribution by Treated/Control Groups*"
+print(fig1)
+```
+
+
+### II. Propensity score match:
+```{r p_score matching}
+nhanes_ps = nhanes %>% mutate( p_score = p_score)
+match_mod = matchit(ps_mod,
+                    distance = 'logit',
+                    method = "nearest", 
+                    caliper = .2,
+                    ratio = 1,
+                    data = nhanes_ps,
+                    replace = FALSE)
+ps_match = match.data(match_mod)
+#dim(ps_match)
+```
+
+### III. Balance Checking:
+```{r check balance}
+var = c("relative_heart_attack", "gender", "age", "race", "edu", "annual_income",
+        "bmi", "smoke_life", "phy_vigorous", "phy_moderate", "blood_press",
+        "blood_press2", "hyper_med", "high_chol", "meadial_access", "cover_hc",
+        "health_diet", "year_smoke", "year_hyper")
+match_tab = CreateTableOne(vars=var, strata="diabete", data=ps_match, test=FALSE)
+print(match_tab, smd = TRUE)  
+```
+
+### IV. Comparison between pre_match data and matched data.
+##### **Table 1: **
+<details>
+<summary> Click to view `code for Table1`. </summary>
+```{r tab1}
+tab_pre_mt = nhanes %>%
+  group_by(diabete, heart_attack) %>%
+  summarize(n = sum(weight), .groups = "drop_last") %>%
+  mutate(
+    prop = 100*(n / sum(n))
+  ) %>%
+  transmute(
+    `Heart Attack` = ifelse(heart_attack == 1, "YES", "NO"),
+    Diabetes = ifelse(diabete == 1, "Diabetes", "NoDiabetes"),
+    prop = sprintf('%10.0f (%4.2f%%)', n, prop)
+  ) %>%
+  pivot_wider(
+    id_cols = `Heart Attack`,
+    names_from = Diabetes,
+    values_from = prop
+  ) %>%
+  knitr::kable(format = 'html') %>%
+  kableExtra::kable_styling("striped", full_width = TRUE) %>%
+  kableExtra::add_header_above(
+    header = c("Proportion of Heat Attack with Pre-matched Group" = 3)
+  )
+```
+</details>
+
+```{r table1, echo = FALSE}
+tab_pre_mt
+```
+##### **Table 2: **
+<details>
+<summary> Click to view `code for Table2`. </summary>
+```{r tab2}
+tab_mt = ps_match %>%
+  group_by(diabete, heart_attack) %>%
+  summarize(n = sum(weight), .groups = "drop_last") %>%
+  mutate(
+    prop = 100*(n / sum(n))
+  ) %>%
+  transmute(
+    `Heart Attack` = ifelse(heart_attack == 1, "YES", "NO"),
+    Diabetes = ifelse(diabete == 1, "Diabetes", "NoDiabetes"),
+    prop = sprintf('%10.0f (%4.2f%%)', n, prop)
+  ) %>%
+  pivot_wider(
+    id_cols = `Heart Attack`,
+    names_from = Diabetes,
+    values_from = prop
+  ) %>%
+  knitr::kable(format = 'html') %>%
+  kableExtra::kable_styling("striped", full_width = TRUE) %>%
+  kableExtra::add_header_above(
+    header = c("Proportion of Heat Attack with Matched Group" = 3)
+  )
+```
+</details>
+
+
+```{r table2, echo = FALSE}
+tab_mt
+```
+
+
+### V. Inverse propensity score weighting:
+##### **Table 3: **
+<details>
+<summary> Click to view `code for Table3`. </summary>
+```{r ipw}
+invert = nhanes_ps %>%
+  select(diabete, heart_attack, weight, p_score) %>%
+  mutate(
+    inverse_wt = ifelse(diabete == 1, 1/p_score, 1/(1-p_score)),
+    new_wt = weight * inverse_wt
+  ) %>% 
+  group_by(diabete, heart_attack) %>%
+  summarize(n = sum(new_wt), .groups = "drop_last") %>%
+  mutate(
+    prop = 100*(n / sum(n))
+  ) %>%
+  transmute(
+    `Heart Attack` = ifelse(heart_attack == 1, "YES", "NO"),
+    Diabetes = ifelse(diabete == 1, "Diabetes", "NoDiabetes"),
+    prop = sprintf('%10.0f (%4.2f%%)', n, prop)
+  ) %>%
+  pivot_wider(
+    id_cols = `Heart Attack`,
+    names_from = Diabetes,
+    values_from = prop
+  ) %>%
+  knitr::kable(format = 'html') %>%
+  kableExtra::kable_styling("striped", full_width = TRUE) %>%
+  kableExtra::add_header_above(
+    header = c("Proportion of Heat Attack with Inverse Propensity Weight" = 3)
+  )
+```
+</details>
+
+```{r table3, echo = FALSE}
+invert
+```
+
+
+
+
+\pagebreak

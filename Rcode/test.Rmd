@@ -1,17 +1,18 @@
 ---
-title: "test"
-author: "Xu Zhihao"
-date: "11/10/2020"
-output: html_document
+title: "Stats 506, F20, Problem Set 1"
+author: "Zhihao Xu, xuzhihao@umich.edu"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(reticulate)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{python, engine.path="/opt/anaconda3/bin/python"}
-import math
-print(math.pi)
+```{r q1_sas}
+cat("```SAS\n")
+writeLines(readLines("./ps6_q1.sas"))
+cat("```\n")
 ```
-
