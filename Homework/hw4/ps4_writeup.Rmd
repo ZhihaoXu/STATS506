@@ -185,8 +185,6 @@ cap = paste(
   "**Figure 5.** Proportion of Most Used TV in US Homes in 2015"
 )
 result_q1b$`./output/ps4_q1_b15`[,1] = region
-idx = rep(c(1,6,2,3,5,4),4) + rep(0:3,each=6)*6
-result_q1b$`./output/ps4_q1_b15` = result_q1b$`./output/ps4_q1_b15`[idx,]
 result_q1b$`./output/ps4_q1_b15`[,2] = tvtype
 result_q1b$`./output/ps4_q1_b15` %>%
   group_by(REGIONC, TVTYPE1) %>%

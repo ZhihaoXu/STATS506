@@ -72,8 +72,12 @@ run;
 data recs15;
  	set recs15;
  	if REGIONC = . then delete;
+ 	if TVTYPE1 = 5 then TVTYPE1 = 1;
+ 	else if TVTYPE1 = 1 then TVTYPE1 = 2;
+ 	else if TVTYPE1 = 2 then TVTYPE1 = 3;
+ 	else if TVTYPE1 = 3 then TVTYPE1 = 5;
+/* 	tvtype1 = decode(TVTYPE1,-2,-2,5,1,1,2,2,3,4,4,3,5) */
 run;
-
 
 /* (a)i: Average number of TV in 2009 by Census Region : ------------------- */
 
@@ -268,7 +272,7 @@ proc export data=ps4_q1_tv15
 run;
 
 data recs_tv_dif;
-	Merge ps4_q1_15_tv(in=T1) ps4_q1_09_tv1(in=T2);
+	Merge ps4_q1_15_tv(in=T1) ps4_q1_09_tv(in=T2);
 	If T1;
 	by regionc;
 run;
@@ -353,6 +357,7 @@ data recs15_prop;
 	set recs15_prop;
 	keep REGIONC TVTYPE1 RowPercent RowStdErr;
 run;
+
 data recs15_prop;
  	set recs15_prop;
  	if TVTYPE1 = . then delete;
