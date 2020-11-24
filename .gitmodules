@@ -4,3 +4,6 @@
 [submodule "Stats506_public"]
 	path = Stats506_public
 	url = https://github.com/ZhihaoXu/Stats506_public.git
+[submodule "final_project"]
+	path = final_project
+	url = https://github.com/ZhihaoXu/Stats506_finalproject.git
