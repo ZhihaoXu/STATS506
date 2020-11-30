@@ -7,3 +7,6 @@
 [submodule "final_project"]
 	path = final_project
 	url = https://github.com/ZhihaoXu/Stats506_finalproject.git
+[submodule "mid_project"]
+	path = mid_project
+	url = https://github.com/ZhihaoXu/Stats506_midproject.git
