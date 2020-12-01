@@ -9,4 +9,11 @@ The final project is about the Benjamini-Hochberg Adjustment on different correl
 - [Stats506_public](https://github.com/ZhihaoXu/Stats506_public):
 Repo for public use. It contains some codes for weekly activity.  
 - [Stats506_F20](https://github.com/jbhender/Stats506_F20):
-Repo by Dr. Henderson for sharing courses materials with Stats 506 in Fall 2020.
+Repo by Dr. Henderson for sharing courses materials with Stats 506 in Fall 2020.  
+
+Here are the links to the write-up for problem sets and project:
+- [Problem Set 1](http://htmlpreview.github.io/?https://github.com/ZhihaoXu/STATS506/blob/master/problem_set/ps1/ps1_writeup.html)
+- [Problem Set 2](http://htmlpreview.github.io/?https://github.com/ZhihaoXu/STATS506/blob/master/problem_set/ps2/ps2_writeup.html)
+- [Problem Set 3](http://htmlpreview.github.io/?https://github.com/ZhihaoXu/STATS506/blob/master/problem_set/ps3/ps3_writeup.html)
+- [Problem Set 4](http://htmlpreview.github.io/?https://github.com/ZhihaoXu/STATS506/blob/master/problem_set/ps4/ps4_writeup.html)
+- [Problem Set 5](http://htmlpreview.github.io/?https://github.com/ZhihaoXu/STATS506/blob/master/problem_set/ps5/ps5_writeup.html)
