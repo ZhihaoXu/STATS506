@@ -1,0 +1,64 @@
+---
+title: "Stats 506, F20, Problem Set 5"
+author: "Zhihao Xu, xuzhihao@umich.edu"
+date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, echo = FALSE)
+source('./ps5_q1.R')
+```
+
+## About
+This is the write-up solution to Problem Set 5 for Stats 506 in Fall 2020.
+
+### Code Organization
+
+## Question 1
+
+
+> For which Census Division has most air conditioning equipment in 2009 and 2015 and which change most from 2009 to 2015? Is this difference larger in urban or rural areas?
+
+Click right to see the R code for answering this question. 
+```{r codeq1, results='asis'}
+cat('```r\n')
+writeLines(readLines('./ps5_q1.R'))
+cat('```')
+```
+
+### Tables{.tabset .tabset-pills .tabset-fade}
+#### Proportion in 2009
+```{r tab09}
+DT::datatable(tab09, escape = FALSE)
+```
+
+#### Proportion in 2015
+```{r tab15}
+DT::datatable(tab15, escape = FALSE)
+```
+
+#### Proportion changes from 2009 to 2015
+```{r tabdif}
+DT::datatable(tabdif, escape = FALSE)
+```
+
+### Figures{.tabset .tabset-pills .tabset-fade}
+#### Proportion in 2009
+```{r fig09,fig.cap=cap1,fig.width=8}
+p1
+```
+
+#### Proportion in 2015
+```{r fig15,fig.cap=cap2,fig.width=8}
+p2
+```
+
+#### Proportion changes from 2009 to 2015
+```{r figdif,fig.cap=cap3,fig.width=8}
+p3
+```
+
+

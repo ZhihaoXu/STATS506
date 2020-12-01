@@ -1,0 +1,351 @@
+---
+title: "Stats 506, F20, Problem Set 4"
+author: "Zhihao Xu, xuzhihao@umich.edu"
+date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
+output: 
+  html_document:
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE, echo = FALSE)
+options(knitr.kable.NA = '')
+```
+
+
+```{r libraries, include=TRUE, message = FALSE}
+library(tidyverse)
+```
+
+```{r directory, include=TRUE, message = FALSE}
+path = './output/'
+```
+## About
+This is the write-up solution to Problem Set 4 for Stats 506 in Fall 2020.
+
+### Code Organization
+- `ps4_q1.sas` consists of the `SAS` code used in Question 1. You need to create the `output/` folder before run. My `SAS` version is University Edition, the paths in the code are different from the path on the computer, which is start from `/folders/myfolders`. You need to change the path if it is running on other computer.
+- `ps4_q2.sas` consists of the `SAS` code used in Question 2.
+- `output` folder consists all the tables exported from `SAS`, which will be used in this write-up file for display.
+- `ps4_writeup.Rmd` builds the page you are reading. Code for figures and tables can be found here.
+
+## Question 1
+
+<details>
+<summary> Click to view `SAS code for Question 1`. </summary>
+```{r}
+writeLines(readLines('./ps4_q1.sas'))
+```
+</details>
+### 
+(a) Compare the average number of televisions (`TVCOLOR`) in US homes in 2009 and 2015 by Census Region
+
+```{r q1a_readdata}
+sheets = c("ps4_q1_a09", "ps4_q1_a15", "ps4_q1_aii")
+sheetspath = paste0(path, sheets)
+result_q1a = vector(mode = 'list')
+for (sheet in sheetspath){
+  file = paste0(sheet, ".csv")
+  result_q1a[[sheet]] = read_delim( file, delim = ',' )
+}
+```
+
+### {.tabset .tabset-pills .tabset-fade}
+#### TV Number 2009
+```{r q1ai09, fig.height=5, fig.width=8, fig.cap=cap, fig.align="center"}
+cap = paste(
+  "**Figure 1.** Average Number of TV in US Homes in 2009"
+)
+region = as_tibble_col(c("Northeast Census Region",
+                         "Midwest Census Region",
+                         "South Census Region",
+                         "West Census Region"), 
+                       column_name = "REGIONC")
+result_q1a$`./output/ps4_q1_a09`[,1] = region
+result_q1a$`./output/ps4_q1_a09` %>%
+  ggplot(aes(x = avg_tv09, y = REGIONC)) +
+  geom_point() +
+  geom_errorbarh( aes(xmin = lwr, xmax = upr)) + 
+  xlab('Mean Number of Televisions') +
+  theme_bw()
+```
+
+#### TV Number 2015
+```{r q1ai15, fig.height=5, fig.width=8, fig.cap=cap, fig.align="center"}
+cap = paste(
+  "**Figure 2.** Average Number of TV in US Homes in 2015"
+)
+result_q1a$`./output/ps4_q1_a15`[,1] = region
+result_q1a$`./output/ps4_q1_a15` %>%
+  ggplot(aes(x = avg_tv15, y = REGIONC)) +
+  geom_point() +
+  geom_errorbarh( aes(xmin = lwr, xmax = upr)) + 
+  xlab('Mean Number of Televisions') +
+  theme_bw()
+```
+
+#### Difference of TV Number from 2009 to 2015
+```{r q1aii, fig.height=5, fig.width=8, fig.cap=cap, fig.align="center"}
+cap = paste(
+  "**Figure 3.** Difference of Average Number of TV in US Homes ",
+  "from 2009 to 2015"
+)
+result_q1a$`./output/ps4_q1_a15`[,1] %>%
+  bind_cols(result_q1a$`./output/ps4_q1_aii`) %>%
+  ggplot(aes(x = dif, y = REGIONC)) +
+  geom_point() +
+  geom_errorbarh( aes(xmin = lwr, xmax = upr)) + 
+  xlab('Mean of the Number of Televisions') +
+  theme_bw()
+```
+
+#### Estimate and Difference in Table
+```{r q1aiii}
+cap = paste(
+  "**Table 1.** Estimate Value of Average TV Number in US Homes ",
+  "for Both 2009 and 2015, and Their Difference"
+)
+result_q1a$`./output/ps4_q1_a09`[,1] %>%
+  bind_cols(
+    result_q1a$`./output/ps4_q1_a09` %>%
+      transmute(
+        tv09 = paste0(sprintf("%4.2f", avg_tv09)," (",
+                     sprintf("%4.2f", lwr),", ",
+                     sprintf("%4.2f", upr),")"),
+      )
+  ) %>%
+  bind_cols(
+    result_q1a$`./output/ps4_q1_a15` %>%
+      transmute(
+        tv15 = paste0(sprintf("%4.2f", avg_tv15)," (",
+                     sprintf("%4.2f", lwr),", ",
+                     sprintf("%4.2f", upr),")"),
+      )
+  ) %>%
+  bind_cols(
+    result_q1a$`./output/ps4_q1_aii` %>%
+      transmute(
+        dif = paste0(sprintf("%4.2f", dif)," (",
+                     sprintf("%4.2f", lwr),", ",
+                     sprintf("%4.2f", upr),")"),
+      )
+  )%>%
+  knitr::kable(format = "html", caption = cap,
+               col.names = c('Census Region', 'TV Number 2009',
+                             'TV Number 2015', 'Difference')) %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
+```
+
+
+### 
+(b) Compare the proportion of primary televisions by display type for most used television (`TVTYPE1`) in US homes in 2009 and 2015 by Census Region
+
+### {.tabset .tabset-pills .tabset-fade}
+
+```{r q1b_readdata}
+sheets = c("ps4_q1_b09", "ps4_q1_b15", "ps4_q1_bii")
+sheetspath = paste0(path, sheets)
+result_q1b = vector(mode = 'list')
+for (sheet in sheetspath){
+  file = paste0(sheet, ".csv")
+  result_q1b[[sheet]] = read_delim( file, delim = ',' )
+}
+```
+
+#### TV Type 2009
+```{r q1bi09, fig.height=6, fig.width=9, fig.cap=cap, fig.align="center"}
+cap = paste(
+  "**Figure 4.** Proportion of Most Used TV in US Homes in 2009"
+)
+region = as_tibble_col(rep(c("Northeast Census Region",
+                         "Midwest Census Region",
+                         "South Census Region",
+                         "West Census Region"), each = 6), 
+                       column_name = "REGIONC")
+tvtype = as_tibble_col(rep(c("Not Applicable",
+                         "Standard Tube", "LCD", "Plasma",
+                         "Projection", "LED"), 4), 
+                       column_name = "TVTYPE1")
+result_q1b$`./output/ps4_q1_b09`[,1] = region
+result_q1b$`./output/ps4_q1_b09`[,2] = tvtype
+result_q1b$`./output/ps4_q1_b09` %>%
+  group_by(REGIONC, TVTYPE1) %>%
+  ggplot(aes(x = RowPercent, y = REGIONC, shape=TVTYPE1)) +
+  geom_point(aes(color = TVTYPE1), position = position_dodge(0.3)) +
+  geom_errorbarh( aes(xmin = lwr, xmax = upr, color=TVTYPE1), 
+                position = position_dodge(0.3)) + 
+  xlab('Proportion of TV Types') +
+  theme_bw() + 
+  theme(legend.position="top")
+```
+
+#### TV Type 2015
+```{r q1bi15, fig.height=6, fig.width=9, fig.cap=cap, fig.align="center"}
+cap = paste(
+  "**Figure 5.** Proportion of Most Used TV in US Homes in 2015"
+)
+result_q1b$`./output/ps4_q1_b15`[,1] = region
+result_q1b$`./output/ps4_q1_b15`[,2] = tvtype
+result_q1b$`./output/ps4_q1_b15` %>%
+  group_by(REGIONC, TVTYPE1) %>%
+  ggplot(aes(x = RowPercent, y = REGIONC, shape=TVTYPE1)) +
+  geom_point(aes(color = TVTYPE1), position = position_dodge(0.3)) +
+  geom_errorbarh( aes(xmin = lwr, xmax = upr, color=TVTYPE1), 
+                position = position_dodge(0.3)) + 
+  xlab('Proportion of TV Types') +
+  theme_bw() + 
+  theme(legend.position="top")
+```
+
+#### Difference of TV Type from 2009 to 2015
+```{r q1bii, fig.height=6, fig.width=9, fig.cap=cap, fig.align="center"}
+cap = paste(
+  "**Figure 6.** Difference in Proportion of Most Used TV in US Homes ", 
+  "from 2009 to 2015"
+)
+result_q1b$`./output/ps4_q1_bii`[,1] = tvtype
+region %>%
+  bind_cols(result_q1b$`./output/ps4_q1_bii`) %>%
+  group_by(REGIONC, TVTYPE1) %>%
+  ggplot(aes(x = dif, y = REGIONC, shape=TVTYPE1)) +
+  geom_point(aes(color = TVTYPE1), position = position_dodge(0.3)) +
+  geom_errorbarh( aes(xmin = lwr, xmax = upr, color=TVTYPE1), 
+                position = position_dodge(0.3)) + 
+  xlab('Proportion of TV Types') +
+  theme_bw() + 
+  theme(legend.position="top")
+```
+
+
+#### Estimate and Difference in Table
+```{r q1biii}
+cap = paste(
+  "**Table 2.** Estimate Value of the Proportion of Most Used TV in US Homes ",
+  "for Both 2009 and 2015, and Their Difference"
+)
+region %>%
+  bind_cols(tvtype) %>%
+  bind_cols(
+    result_q1b$`./output/ps4_q1_b09` %>%
+      transmute(
+        tv09 = paste0(sprintf("%5.3f", RowPercent/100)," (",
+                     sprintf("%5.3f", lwr/100),", ",
+                     sprintf("%5.3f", upr/100),")"),
+      )
+  ) %>%
+  bind_cols(
+    result_q1b$`./output/ps4_q1_b15` %>%
+      transmute(
+        tv09 = paste0(sprintf("%5.3f", RowPercent/100)," (",
+                     sprintf("%5.3f", lwr/100),", ",
+                     sprintf("%5.3f", upr/100),")"),
+      )
+  )%>%
+  bind_cols(
+    result_q1b$`./output/ps4_q1_bii` %>%
+      transmute(
+        tv09 = paste0(sprintf("%5.3f", dif/100)," (",
+                     sprintf("%5.3f", lwr/100),", ",
+                     sprintf("%5.3f", upr/100),")"),
+      )
+  )%>%
+  knitr::kable(format = "html", caption = cap,
+               col.names = c('Census Region', 'TV Type', 'Proportion 2009', 
+                             'Proportion 2015', 'Difference')) %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
+
+```
+
+## Question 2
+<details>
+<summary> Click to view `SAS code for Question 2`. </summary>
+```{r}
+writeLines(readLines('./ps4_q2.sas'))
+```
+</details>
+
+Here I just pick the first tooth `OHX01TC` as response.
+
+```{r q2a}
+sheets = c("ps4_q2_1", "ps4_q2_2", "ps4_q2_3", "ps4_q2_4")
+sheetspath = paste0(path, sheets)
+result_q2 = vector(mode = 'list')
+for (sheet in sheetspath){
+  file = paste0(sheet, ".csv")
+  result_q2[[sheet]] = read_delim( file, delim = ',' )
+}
+```
+
+<html>
+<table style="margin-left: auto; margin-right: auto;" class="table table-bordered table-striped table-condensed">>
+
+<tr>
+<th> Logistics Regression without weight `proc logistic`</th>
+<th> Logistics Regression with weight `proc surveylogistic`</th>
+</tr>
+
+<tr>
+<td> Analysis of Maximum Likelihood Estimates </td>
+<td> Analysis of Maximum Likelihood Estimates </td>
+</tr>
+
+<tr>
+<td>
+```{r q2_1}
+result_q2$`./output/ps4_q2_1` %>%
+  select(-`_ESTTYPE_`) %>%
+  mutate(
+    Estimate = sprintf("%4.2f", Estimate),
+    StdErr = sprintf("%4.2f", StdErr),
+    WaldChiSq = sprintf("%4.2f", WaldChiSq)
+  ) %>%
+  knitr::kable(format = "html") %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
+```
+</td>
+<td> 
+```{r q2_2}
+result_q2$`./output/ps4_q2_3` %>%
+  select(-tValue, -ProbT) %>%
+  mutate(
+    Estimate = sprintf("%4.2f", Estimate),
+    StdErr = sprintf("%4.2f", StdErr),
+    WaldChiSq = sprintf("%4.2f", WaldChiSq)
+  ) %>%
+  knitr::kable(format = "html") %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
+```
+</td>
+</tr>
+
+<tr>
+<td> Model Fit Statistics </td>
+<td> Model Fit Statistics </td>
+</tr>
+
+<tr>
+<td>
+```{r q2_3}
+result_q2$`./output/ps4_q2_2` %>%
+  knitr::kable(format = "html") %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
+```
+</td>
+<td> 
+```{r q2_4}
+result_q2$`./output/ps4_q2_4` %>%
+  knitr::kable(format = "html") %>%
+  kableExtra::kable_styling('striped', full_width = TRUE)
+```
+</td>
+</tr>
+</table>
+</html>
+
+
+
+
+
+
+
+

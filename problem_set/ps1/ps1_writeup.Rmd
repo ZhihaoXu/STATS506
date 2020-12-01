@@ -1,0 +1,83 @@
+---
+title: "Stats 506, F20, Problem Set 1"
+author: "Zhihao Xu, xuzhihao@umich.edu"
+date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
+output: pdf_document
+---
+
+In this assignment, `ps1_q1_ohxden.sh` is the bash file for Question 1 Part A, 
+`ps1_q1_demo.sh` is the bash file for Part B, `xpt2csv.R` is the Rcode used to 
+transfer the XPT file to csv file, and `ps1_q2.R` is the R code for Question 2.
+
+```{r setup, include=FALSE}
+# 79: -------------------------------------------------------------------------
+#! We generally don't need to see the code in the results document.
+knitr::opts_chunk$set(echo = FALSE)
+#! Make sure all chunks have a label. This one is labelled 'setup'.
+```
+
+## Question 1
+
+### Part A
+Here is the solution text for `ps1_q1_ohxden.sh`. In the resulting datasets, 
+there are totally 35909 observations and 62 variables.
+
+```{r ps1_q1a, results = 'asis'}
+cat('```r\n')
+writeLines(readLines('./R_vector.R'))
+cat('```')
+```
+
+
+### Part B
+Here is the solution text for `ps1_q1_demo.sh`. In the resulting datasets, 
+there are totally 39156 observations and 10 variables.
+
+```{r ps1_q1b, results = 'asis'}
+cat('```bash\n')
+writeLines(readLines('./ps1_q1_demo.sh'))
+cat('```')
+```
+
+\pagebreak
+
+## Question 2
+
+### Part A and B
+```{r ps1_q2ab, results = 'asis'}
+cat('```r\n')
+writeLines(readLines('./ps1_q2.R'))
+cat('```')
+```
+
+\pagebreak
+### Part C
+```{r rocrf, include=FALSE}
+source("ps1_q2.R")
+roc = perf_roc(data[,2],data[,1],"none")
+pr = perf_pr(data[,2],data[,1],"none")
+```
+
+The AUC-ROC is `r roc$area_roc` and the AUC-PR is `r pr$area_pr`. 
+Attached are both the base R and ggplot2 versions of plots showing the curves.
+
+```{r q2_roc1, echo=FALSE, fig.height=4, fig.width=5.5,fig.cap=cap}
+roc1 = perf_roc(data[,2],data[,1],"base")
+cap = paste0("ROC Curve by base R Graphics")
+```
+
+```{r q2_roc2, echo=FALSE, fig.height=3, fig.width=5,fig.cap=cap}
+roc2 = perf_roc(data[,2],data[,1],"ggplot2")
+cap = paste0("ROC Curve by ggplot2")
+```
+
+```{r q2_pr1, echo=FALSE, fig.height=4, fig.width=5.5,fig.cap=cap}
+pr1 = perf_pr(data[,2],data[,1],"base")
+cap = paste0("Prediction-Recall Curve by base R Graphics")
+```
+
+```{r q2_pr2, echo=FALSE, fig.height=3, fig.width=5,fig.cap=cap}
+pr2 = perf_pr(data[,2],data[,1],"ggplot2")
+cap = paste0("Prediction-Recall Curve by ggplot2")
+```
+
