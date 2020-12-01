@@ -2,7 +2,9 @@
 title: "Stats 506, F20, Problem Set 1"
 author: "Zhihao Xu, xuzhihao@umich.edu"
 date: "`r format.Date(Sys.Date(), '%B %d, %Y')`"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 In this assignment, `ps1_q1_ohxden.sh` is the bash file for Question 1 Part A, 
@@ -23,8 +25,8 @@ Here is the solution text for `ps1_q1_ohxden.sh`. In the resulting datasets,
 there are totally 35909 observations and 62 variables.
 
 ```{r ps1_q1a, results = 'asis'}
-cat('```r\n')
-writeLines(readLines('./R_vector.R'))
+cat('```bash\n')
+writeLines(readLines('./ps1_q1_ohxden.sh'))
 cat('```')
 ```
 
