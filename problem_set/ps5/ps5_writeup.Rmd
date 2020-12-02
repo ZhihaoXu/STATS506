@@ -7,7 +7,7 @@ output:
     code_folding: hide
 ---
 
-```{r setup, include=FALSE}
+```{r setup1, include=FALSE}
 knitr::opts_chunk$set(message = FALSE, echo = FALSE)
 source('./ps5_q1.R')
 ```
@@ -16,10 +16,14 @@ source('./ps5_q1.R')
 This is the write-up solution to Problem Set 5 for Stats 506 in Fall 2020.
 
 ### Code Organization
+- `ps2_q1.R` consists of the R-code for Question 1
+- `ps2_q2.R` consists of the R-code for Question 2
+- `ps5_writeup.R` builds the page your are reading.
+
 
 ## Question 1
 
-
+### Research Question:
 > For which Census Division has most air conditioning equipment in 2009 and 2015 and which change most from 2009 to 2015? Is this difference larger in urban or rural areas?
 
 Click right to see the R code for answering this question. 
@@ -60,5 +64,54 @@ p2
 ```{r figdif,fig.cap=cap3,fig.width=8}
 p3
 ```
+
+### 
+Through the above tables and figures, in 2009, South Atlantic, East South Central and West South Central have relatively high proportion of air conditioning equipment, and the proportion is quite similar among Rural and Urban Area. In 2015, except the above census division, East North Central and West North Central also have high proportion of air conditioning equipment. As for the difference from 2009 to 2015, the proportion of air conditioning equipment in rural area of East North Central, Urban area of Mountain North and Urban area of Pacific increase significantly. The proportion in rural region of Mountain South decreases sharply.
+
+
+## Question 2
+```{r setup2, include=FALSE}
+source('./ps5_q2.R')
+```
+
+Click right to see the R code for answering this question. 
+```{r codeq2, results='asis'}
+cat('```r\n')
+writeLines(readLines('./ps5_q2.R'))
+cat('```')
+```
+
+Here is some part of `ohx_long` to preview, which is the same as the given screen-shot:
+```{r ohx_long}
+ohx_long
+```
+
+
+In the data analysis part, we divided the data into 4 cohorts by year, and implement the following approach and compute the corresponding cross entropy loss of these approach:  
+
+1. Use logistic regression to model the probability that a tooth is present as a smooth function of age (using a cubic smoothing spline) common to all teeth and a per-tooth indicator variable. Account for dependence among teeth within an individual subject using a random intercept. Using the variable names from the screen shot in part "a" the formula is:  
+`perm_tooth ~ tooth + s(age, bs = 'cs') + s(id, bs = 're')`.  
+The cross-entropy loss for this approach is `r ce_loss1`.
+
+2. Repeat the previous approach, but include an interaction between tooth and age as follows:  
+`perm_tooth ~ tooth + s(age, bs = 'cs', by = tooth) + s(id, bs = 're')`.  
+The cross-entropy loss for this approach is `r ce_loss2`.
+
+3. Repeat the previous step by modeling each tooth separately, so that the random intercepts are no longer needed:  
+`perm_tooth ~ s(age, bs = 'cs')`.  
+The cross-entropy loss for this approach is `r ce_loss3`.  
+
+Overall, approach 2 and approach 3 have quite similar results, the best approach here is approach 2 with cross-entropy loss `r ce_loss2`,
+
+
+
+
+
+
+
+
+
+
+
 
 

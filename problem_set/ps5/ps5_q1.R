@@ -6,7 +6,6 @@
 # libraries: ------------------------------------------------------------------
 library(tidyverse)
 library(data.table)
-library(kableExtra)
 
 # directories: ----------------------------------------------------------------
 path = './data/'
