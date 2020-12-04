@@ -1,4 +1,4 @@
-## Stats 506, Fall 2020 Problem Set 5 Question 1
+## Stats 506, Fall 2020 Problem Set 5 Question 2
 ##
 ## Author: Zhihao Xu, xuzhihao@umich.edu
 ## Updated: December 1, 2020 
